@@ -1,4 +1,5 @@
 /build/
+/build.local
 /docs/
 /dist/
 /nbproject/private/
