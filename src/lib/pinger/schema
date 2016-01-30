@@ -1,0 +1,28 @@
+DB.
+===
+Table `hosts`
+=============
+host_id         smallint(5) unsig pk ai
+host_label      varchar(64) unq
+host_fqdn       varchar(255) unq
+host_enabled    tinyint(3) unsig
+
+
+Table `data`
+=============
+row_id          int(10) unsig pk ai
+host_id         smallint(5) unsig idx
+streak_id       mediumint(8) unsig
+ping_status     tinyint(4) sig
+ping_state      tinyint(3) unsig
+ping_datetime   datetime default:current_timestampt idx
+
+
+Redis.
+======
+$bank$hosts:enabled         set<label>
+$bank$hosts:data:$label$    hash<id,label,fqdn,addr,status,state>
+$bank$queue:nslookup        set<label>
+$bank$queue:ping:ok         set<label>
+$bank$queue:ping:prefailed  set<label>
+$bank$queue:ping:failed     set<label>
