@@ -98,9 +98,17 @@ if ( !defined('PINGER_AUTOLOAD'))
         (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #1: real_class = %s\n", $real_class);
         (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #1: try_path = %s\n", $try_file);
         
-        include $try_file;
+        if (file_exists($try_file))
+        {
+            (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #1: file exists\n");
+            
+            include $try_file;
+            return true;
+        }
         
-        (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #1: done\n");
+        (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #1: file not exists\n");
+        
+        return false;
     });
     
     spl_autoload_register(function ($class) {
@@ -112,9 +120,17 @@ if ( !defined('PINGER_AUTOLOAD'))
         (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #2: real_class = %s\n", $real_class);
         (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #2: try_path = %s\n", $try_file);
         
-        include $try_file;
+        if (file_exists($try_file))
+        {
+            (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #2: file exists\n");
+            
+            include $try_file;
+            return true;
+        }
         
-        (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #2: done\n");
+        (DEBUG || DEBUG_AUTOLOADER) && printf("Autoloader #2: file not exists\n");
+        
+        return false;
     });
     
     define('PINGER_AUTOLOAD', true);
