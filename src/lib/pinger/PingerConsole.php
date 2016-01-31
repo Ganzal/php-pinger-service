@@ -435,7 +435,7 @@ class PingerConsole
             $res = DBQueries::hostXXable($host->host_id, 1);
 
             // отсечка о возобновлении сбора данных
-            DBQueries::dataPush($host->host_id, HostStatuses::ENABLED, 0);
+            DBQueries::dataPush($host->host_id, HostStatuses::ENABLED_WAITING, 0);
 
             // обновление статуса в кэше Redis.
             // достаточно добавить в список hosts:enabled.
