@@ -90,7 +90,7 @@ class PID
 
             @flock(static::$handle, LOCK_UN);
             @fclose(static::$handle);
-            $u = @unlink(static::FILENAME);
+            $u = @unlink(PINGER_PIDFILE);
 
             if (!$u)
             {
