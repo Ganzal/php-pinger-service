@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- build.xml for Apache ANT -->
+<project name="pinger-service" default="build" basedir=".">
+    
+    <!-- BUILD-TIME CONFIGURATION -->
+    
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    
+    <!-- PATH CONFIGURATION -->
+    
+    <condition property="php" value="/usr/bin/env php">
+        <not>  
+            <isset property="php"/>
+        </not>
+    </condition>
+    
+    <condition property="prefix" value="/usr/local">
+        <not>  
+            <isset property="prefix"/>
+        </not>
+    </condition>
+    
+    <condition property="eprefix" value="${prefix}">
+        <not>  
+            <isset property="exec-prefix"/>
+        </not>
+    </condition>
+    
+    <condition property="bindir" value="${eprefix}/bin">
+        <not>  
+            <isset property="bindir"/>
+        </not>
+    </condition>
+    
+    <condition property="sysconfdir" value="${eprefix}/etc">
+        <not>  
+            <isset property="sysconfdir"/>
+        </not>
+    </condition>
+    
+    <condition property="libdir" value="${eprefix}/lib">
+        <not>  
+            <isset property="libdir"/>
+        </not>
+    </condition>
+    
+    <condition property="sbindir" value="${eprefix}/sbin">
+        <not>  
+            <isset property="sbindir"/>
+        </not>
+    </condition>
+    
+    <condition property="with-conf" value="${sysconfdir}/pinger-config.php">
+        <not>  
+            <isset property="with-conf"/>
+        </not>
+    </condition>
+    
+    <property name="conf" value="${with-conf}"/>
+    
+    <condition property="with-pidfile" value="/run/pinger.pid">
+        <not>  
+            <isset property="with-pidfile"/>
+        </not>
+    </condition>
+    
+    <property name="pidfile" value="${with-pidfile}"/>
+    
+    <condition property="with-logdir" value="/var/log/pinger">
+        <not>  
+            <isset property="with-logdir"/>
+        </not>
+    </condition>
+    
+    <property name="pidfile" value="${with-pidfile}"/>
+    
+    <!-- RUNTIME CONFIGURATION -->
+    
+    <condition property="conf-exec-user" value="nobody">
+        <not>  
+            <isset property="conf-exec-user"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-exec-group" value="nogroup">
+        <not>  
+            <isset property="conf-exec-group"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-fork-threads" value="0">
+        <not>  
+            <isset property="conf-fork-hreads"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-nslookup-server" value="">
+        <not>  
+            <isset property="conf-nslookup-server"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-host" value="127.0.0.1">
+        <not>  
+            <isset property="conf-mysql-host"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-port" value="3306">
+        <not>  
+            <isset property="conf-mysql-port"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-sock" value="/var/run/mysqld/mysqld.sock">
+        <not>  
+            <isset property="conf-mysql-sock"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-cset" value="utf8">
+        <not>  
+            <isset property="conf-mysql-cset"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-user" value="root">
+        <not>  
+            <isset property="conf-mysql-user"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-pass" value="">
+        <not>  
+            <isset property="conf-mysql-pass"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-mysql-base" value="pinger">
+        <not>  
+            <isset property="conf-mysql-base"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-ping-timeout-ok" value="1">
+        <not>  
+            <isset property="conf-ping-timeout-ok"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-ping-timeout-prefail" value="5">
+        <not>  
+            <isset property="conf-ping-timeout-prefail"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-ping-timeout-fail" value="1">
+        <not>  
+            <isset property="conf-ping-timeout-fail"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-ping-command" value="/usr/bin/env ping -c1 -W%1$d -n -q %2$s">
+        <not>  
+            <isset property="conf-ping-command"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-redis-host" value="127.0.0.1">
+        <not>  
+            <isset property="conf-redis-host"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-redis-port" value="6379">
+        <not>  
+            <isset property="conf-redis-port"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-redis-wait" value="1.0">
+        <not>  
+            <isset property="conf-redis-wait"/>
+        </not>
+    </condition>
+    
+    <condition property="conf-redis-bank" value="pinger">
+        <not>  
+            <isset property="conf-redis-bank"/>
+        </not>
+    </condition>
+    
+    <!-- BUILD-TIME PATH CONFIGURATION -->
+    
+    <property name="build.bin.d" value="${build}${bindir}"/>
+    <property name="build.etc.d" value="${build}${sysconfdir}"/>
+    <property name="build.lib.d" value="${build}${libdir}/pinger"/>
+    <property name="build.sbin.d" value="${build}${sbindir}"/>
+    
+    <property name="dist.bin.d" value="${dist}${bindir}"/>
+    <property name="dist.etc.d" value="${dist}${sysconfdir}"/>
+    <property name="dist.lib.d" value="${dist}${libdir}/pinger"/>
+    <property name="dist.sbin.d" value="${dist}${sbindir}"/>
+    
+    <!-- TARGETS -->
+        
+    <!-- CLEAN -->
+    
+    <target name="clean">
+        <echo message="Removing 'build/**'" />
+        <delete dir="${build}" />
+        
+        <echo message="Removing 'dist/**'" />
+        <delete dir="${dist}" />
+        
+        <echo message="Making 'build/**'" />
+        
+        <mkdir dir="${build}/etc/default" />
+        <mkdir dir="${build}/etc/init.d" />
+        <mkdir dir="${build.bin.d}" />
+        <mkdir dir="${build.etc.d}" />
+        <mkdir dir="${build.lib.d}" />
+        <mkdir dir="${build.sbin.d}" />
+        
+        <echo message="Done" />
+    </target>
+    
+    <!-- SUB: BUILD /usr/local/bin/pinger -->
+    
+    <target name="build-bin">
+        <echo message="Building BINDIR/pinger${suffix} binary ..." />
+        
+        <copy file="${src}/build/BINDIR/pinger.bin.tpl" tofile="${build.bin.d}/pinger${suffix}">
+            <filterchain>
+                <replacetokens>
+                    <token key="base" value="${base}"/>
+                    <token key="libdir" value="${libdir}"/>
+                    <token key="php" value="${php}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+        
+        <chmod file="${build.bin.d}/pinger${suffix}" perm="755" />
+    </target>
+    
+    <!-- SUB: BUILD /usr/local/sbin/pinger -->
+    
+    <target name="build-sbin">
+        <echo message="Building SBINDIR/pinger${suffix} binary ..." />
+        
+        <copy file="${src}/build/SBINDIR/pinger.sbin.tpl" tofile="${build.sbin.d}/pinger${suffix}">
+            <filterchain>
+                <replacetokens>
+                    <token key="base" value="${base}"/>
+                    <token key="libdir" value="${libdir}"/>
+                    <token key="php" value="${php}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+        
+        <chmod file="${build.sbin.d}/pinger${suffix}" perm="755" />
+    </target>
+    
+    <!-- SUB: BUILD /etc/init.d/pinger -->
+    
+    <target name="build-initd">
+        <echo message="Building /etc/init.d/pinger${suffix} binary ..." />
+        
+        <copy file="${src}/build/etc/init.d/pinger.initd.tpl" tofile="${build}/etc/init.d/pinger${suffix}">
+            <filterchain>
+                <replacetokens>
+                    <token key="base" value="${base}"/>
+                    <token key="sbindir" value="${sbindir}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+        
+        <chmod file="${build}/etc/init.d/pinger${suffix}" perm="755" />
+    </target>
+    
+    <!-- SUB: BUILD /usr/local/lib/pinger -->
+    
+    <target name="build-lib">
+        <echo message="Copying LIBDIR/pinger data ..." />
+        
+        <copy todir="${build.lib.d}">
+            <fileset dir="${src}/lib/pinger" defaultexcludes="no">
+                <include name="**/*.php" />
+            </fileset>
+        </copy>
+        
+        <chmod perm="755" type="dir">
+            <fileset dir="${build.lib.d}" />
+        </chmod>
+        
+        <chmod perm="644" type="file">
+            <fileset dir="${build.lib.d}" />
+        </chmod>
+    </target>
+    
+    <!-- SUB: BUILD /usr/local/lib/pinger/bootstrap.php -->
+        
+    <target name="build-bootstrap">
+        <echo message="Building ${target}/bootstrap.php file ..." />
+        
+        <copy file="${src}/build/LIBDIR/pinger/bootstrap.php.tpl" tofile="${target}/bootstrap.php${suffix}" overwrite="yes">
+            <filterchain>
+                <replacetokens>
+                    <token key="base" value="${base}"/>
+                    
+                    <token key="prefix" value="${prefix}"/>
+                    <token key="eprefix" value="${eprefix}"/>
+                    <token key="bindir" value="${bindir}"/>
+                    
+                    <token key="libdir" value="${libdir}"/>
+                    <token key="sbindir" value="${sbindir}"/>
+                    <token key="sysconfdir" value="${sysconfdir}"/>
+                    
+                    <token key="conf" value="${conf}"/>
+                    <token key="pidfile" value="${pidfile}"/>
+                    <token key="logdir" value="${logdir}"/>
+                    <token key="php" value="${php}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+        
+        <chmod file="${base}/bootstrap.php${suffix}" perm="644" />
+    </target>
+    
+    <!-- SUB: BUILD /usr/local/etc/pinger-config.php -->
+    
+    <target name="build-conf">
+        <echo message="Building ${target} file ..." />
+        
+        <copy file="${src}/build/SYSCONFDIR/pinger-config.php.tpl" tofile="${target}">
+            <filterchain>
+                <replacetokens>
+                    <token key="conf_exec_user" value="${conf-exec-user}"/>
+                    <token key="conf_exec_group" value="${conf-exec-group}"/>
+                    
+                    <token key="conf_fork_threads" value="${conf-fork-threads}"/>
+                    
+                    <token key="conf_nslookup_server" value="${conf-nslookup-server}"/>
+                    
+                    <token key="conf_mysql_host" value="${conf-mysql-host}"/>
+                    <token key="conf_mysql_port" value="${conf-mysql-port}"/>
+                    <token key="conf_mysql_sock" value="${conf-mysql-sock}"/>
+                    <token key="conf_mysql_cset" value="${conf-mysql-cset}"/>
+                    
+                    <token key="conf_mysql_user" value="${conf-mysql-user}"/>
+                    <token key="conf_mysql_pass" value="${conf-mysql-pass}"/>
+                    
+                    <token key="conf_mysql_base" value="${conf-mysql-base}"/>
+                    
+                    <token key="conf_ping_timeout_ok" value="${conf-ping-timeout-ok}"/>
+                    <token key="conf_ping_timeout_prefail" value="${conf-ping-timeout-prefail}"/>
+                    <token key="conf_ping_timeout_fail" value="${conf-ping-timeout-fail}"/>
+                    <token key="conf_ping_command" value="${conf-ping-command}"/>
+                    
+                    <token key="conf_redis_host" value="${conf-redis-host}"/>
+                    <token key="conf_redis_port" value="${conf-redis-port}"/>
+                    <token key="conf_redis_wait" value="${conf-redis-wait}"/>
+                    <token key="conf_redis_bank" value="${conf-redis-bank}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+        
+        <chmod file="${target}" perm="640" />
+        <chown file="${target}" owner="root" />
+        <chgrp file="${target}" group="root" />
+    </target>
+    
+    <!-- BUILD -->
+    
+    <target name="build" depends="clean">
+        <echo>Prefix      : ${prefix}</echo>
+        <echo>Exec-Prefix : ${eprefix}</echo>
+        <echo>PHP         : ${php}</echo>
+        <echo>Bin dir     : ${bindir}</echo>
+        <echo>Config dir  : ${sysconfdir}</echo>
+        <echo>Lib dir     : ${libdir}</echo>
+        <echo>SBin dir    : ${sbindir}</echo>
+        
+        <!-- BUILD /usr/local/bin/pinger -->
+        
+        <antcall target="build-bin">
+            <param name="base" value="${build}"/>
+            <param name="suffix" value=""/>
+        </antcall>
+        
+        <antcall target="build-bin">
+            <param name="base" value=""/>
+            <param name="suffix" value=".dist"/>
+        </antcall>
+        
+        <!-- BUILD /usr/local/sbin/pinger -->
+        
+        <antcall target="build-sbin">
+            <param name="base" value="${build}"/>
+            <param name="suffix" value=""/>
+        </antcall>
+        
+        <antcall target="build-sbin">
+            <param name="base" value=""/>
+            <param name="suffix" value=".dist"/>
+        </antcall>
+        
+        <!-- BUILD /etc/init.d/pinger -->
+        
+        <antcall target="build-initd">
+            <param name="base" value="${build}"/>
+            <param name="suffix" value=""/>
+        </antcall>
+        
+        <antcall target="build-initd">
+            <param name="base" value=""/>
+            <param name="suffix" value=".dist"/>
+        </antcall>
+        
+        <!-- COPY /etc/default/pinger -->
+        
+        <echo message="Copying /etc/default/pinger file ..." />
+        
+        <copy file="${src}/build/etc/default/pinger" tofile="${build}/etc/default/pinger" />
+        <chmod file="${build}/etc/default/pinger" perm="644" />
+        
+        <!-- BUILD /usr/local/etc/pinger-config.php -->
+        
+        <antcall target="build-conf">
+            <param name="target" value="${build}/pinger-config.php"/>
+        </antcall>
+        
+        <antcall target="build-conf">
+            <param name="target" value="${build}${conf}"/>
+        </antcall>
+        
+        <!-- COPY /usr/local/lib/pinger -->
+        
+        <antcall target="build-lib" />
+        
+        <!-- BUILD /usr/local/lib/pinger/bootstrap.php -->
+        
+        <antcall target="build-bootstrap">
+            <param name="base" value="${build}"/>
+            <param name="suffix" value="" />
+            <param name="target" value="${build}"/>
+            <param name="conf" value="/pinger-config.php"/>
+            <param name="pidfile" value="/pinger.pid"/>
+            <param name="logdir" value=""/>
+        </antcall>
+        
+        <antcall target="build-bootstrap">
+            <param name="base" value="${build}"/>
+            <param name="suffix" value="" />
+            <param name="target" value="${build.lib.d}"/>
+            <param name="conf" value="/pinger-config.php"/>
+            <param name="pidfile" value="/pinger.pid"/>
+            <param name="logdir" value=""/>
+        </antcall>
+        
+        <antcall target="build-bootstrap">
+            <param name="base" value=""/>
+            <param name="suffix" value=".dist" />
+            <param name="target" value="${build.lib.d}"/>
+            <param name="logdir" value="${with-logdir}"/>
+        </antcall>
+        
+        <!-- DONE -->
+        
+        <echo message="Done" />
+    </target>
+    
+    <!-- BUILD DIST -->
+    
+    <target name="build-dist" depends="build">
+        <copy todir="${dist}" verbose="yes">
+            <fileset dir="${build}">
+                <include name="**/*" />
+                <exclude name="/" />
+                <exclude name="bootstrap.php" />
+                <exclude name="pinger-config.php" />
+                <exclude name="pinger.pid" />
+            </fileset>
+        </copy>
+        
+        <move file="${dist.bin.d}/pinger.dist" tofile="${dist.bin.d}/pinger" overwrite="yes" />
+        <chmod file="${dist.bin.d}/pinger" perm="755" />
+        
+        <move file="${dist.sbin.d}/pinger.dist" tofile="${dist.sbin.d}/pinger" overwrite="yes" />
+        <chmod file="${dist.sbin.d}/pinger" perm="755" />
+        
+        <move file="${dist}/etc/init.d/pinger.dist" tofile="${dist}/etc/init.d/pinger" overwrite="yes" />
+        <chmod file="${dist}/etc/init.d/pinger" perm="755" />
+        
+        <move file="${dist.lib.d}/bootstrap.php.dist" tofile="${dist.lib.d}/bootstrap.php" overwrite="yes" />
+    </target>
+    
+</project>
