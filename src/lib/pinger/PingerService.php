@@ -45,7 +45,7 @@ class PingerService
             echo "CLI only!\n";
             exit(1);
         }
-        
+
         if (0 !== posix_geteuid())
         {
             echo "Error: Pinger Service must be launched as root!\n";
@@ -104,6 +104,17 @@ class PingerService
             // проверка PID-файла
             Assets\PID::PreLock();
 
+            $ruid = posix_getpwnam(Assets\Config::$exec_user)['uid'];
+            $rgid = posix_getgrnam(Assets\Config::$exec_group)['gid'];
+
+            if (null === $ruid || null === $rgid)
+            {
+                printf(" [FAIL]\nRequired exec user:group [%s:%s] was not found.\n",
+                        Assets\Config::$exec_user, Assets\Config::$exec_group
+                );
+                exit(1);
+            }
+
             // попытка запуска Мастер-процесса
             $pid = @pcntl_fork();
 
@@ -126,9 +137,23 @@ class PingerService
                 // рутины дочернего процесса - Мастер-процесса
                 //
                 
-                /* @todo Реализовать переключение UID:GID процесса. */
-//                posix_setuid(50000);
-//                posix_setgid(50000);
+                // переключение группы-владельца процесса
+                // выполняется ДО переключения пользователя-владельца
+                if (!posix_setegid($rgid))
+                {
+                    printf("Failed to posix_setegid(%d) [%s].\n", $rgid,
+                            Assets\Config::$exec_group);
+                    exit(1);
+                }
+
+                // переключение пользователя-владельца процесса
+                if (!posix_seteuid($ruid))
+                {
+                    printf("Failed to posix_seteuid(%d) [%s].\n", $ruid,
+                            Assets\Config::$exec_user);
+                    exit(1);
+                }
+
                 // открытие журналов
                 TwinLog::init(PINGER_LOGDIR, 'Master');
 
