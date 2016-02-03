@@ -227,12 +227,12 @@
         <echo message="Done" />
     </target>
     
-    <!-- SUB: BUILD /usr/local/bin/pinger -->
+    <!-- SUB: BUILD /usr/local/bin/pingerc -->
     
     <target name="build-bin">
-        <echo message="Building BINDIR/pinger${suffix} binary ..." />
+        <echo message="Building BINDIR/pingerc${suffix} binary ..." />
         
-        <copy file="${src}/build/BINDIR/pinger.bin.tpl" tofile="${build.bin.d}/pinger${suffix}">
+        <copy file="${src}/build/BINDIR/pingerc.bin.tpl" tofile="${build.bin.d}/pingerc${suffix}">
             <filterchain>
                 <replacetokens>
                     <token key="base" value="${base}"/>
@@ -242,7 +242,7 @@
             </filterchain>
         </copy>
         
-        <chmod file="${build.bin.d}/pinger${suffix}" perm="755" />
+        <chmod file="${build.bin.d}/pingerc${suffix}" perm="755" />
     </target>
     
     <!-- SUB: BUILD /usr/local/sbin/pinger -->
@@ -485,8 +485,8 @@
             </fileset>
         </copy>
         
-        <move file="${dist.bin.d}/pinger.dist" tofile="${dist.bin.d}/pinger" overwrite="yes" />
-        <chmod file="${dist.bin.d}/pinger" perm="755" />
+        <move file="${dist.bin.d}/pingerc.dist" tofile="${dist.bin.d}/pinger" overwrite="yes" />
+        <chmod file="${dist.bin.d}/pingerc" perm="755" />
         
         <move file="${dist.sbin.d}/pinger.dist" tofile="${dist.sbin.d}/pinger" overwrite="yes" />
         <chmod file="${dist.sbin.d}/pinger" perm="755" />
