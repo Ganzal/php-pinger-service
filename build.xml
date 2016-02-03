@@ -224,6 +224,8 @@
         <mkdir dir="${build.lib.d}" />
         <mkdir dir="${build.sbin.d}" />
         
+        <chmod dir="${build}" perm="1777" verbose="yes" />
+        
         <echo message="Done" />
     </target>
     
