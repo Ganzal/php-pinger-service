@@ -45,13 +45,12 @@ class PingerService
             echo "CLI only!\n";
             exit(1);
         }
-
-        /* @todo Реализовать проверку владельца процесса. */
-//        if (0 !== posix_geteuid())
-//        {
-//            echo "Must be launched as root!\n";
-//            exit(1);
-//        }
+        
+        if (0 !== posix_geteuid())
+        {
+            echo "Error: Pinger Service must be launched as root!\n";
+            exit(1);
+        }
 
         $argv += array_fill(0, 4, null);
 
