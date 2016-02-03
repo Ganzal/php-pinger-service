@@ -98,14 +98,13 @@ class PingerConsole
         {
             die("CLI only!");
         }
-
-        /* @todo Реализовать проверку владельца процесса. */
-//        if (0 !== posix_geteuid())
-//        {
-//            echo "Must be launched as root!\n";
-//            exit(1);
-//        }
-
+        
+        if (!count(array_intersect(posix_getgroups(), [0, posix_getgrnam('pinger')['gid']])))
+        {
+            echo "Error: Pinger Console must be launched as root or from group named 'pinger'!\n";
+            exit(1);
+        }
+        
         $argv += array_fill(0, 4, null);
 
         switch ($argv[1])
