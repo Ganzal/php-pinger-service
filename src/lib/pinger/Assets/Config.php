@@ -23,7 +23,7 @@ class Config
      * @access public
      * @static
      */
-    public static $exec_user = 'nobody';
+    public static $exec_user = 'pinger';
 
     /**
      * Группа-владелец Мастер-процесса.
@@ -32,7 +32,7 @@ class Config
      * @access public
      * @static
      */
-    public static $exec_group = 'nogroup';
+    public static $exec_group = 'pinger';
 
     /**
      * Лимит дочерних процессов Воркеров.

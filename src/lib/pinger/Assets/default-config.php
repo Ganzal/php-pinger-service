@@ -23,13 +23,13 @@ return [
      * 
      * @var string
      */
-    'exec_user' => 'nobody',
+    'exec_user' => 'pinger',
     /**
      * Группа-владелец Мастер-процесса.
      * 
      * @var string
      */
-    'exec_group' => 'nogroup',
+    'exec_group' => 'pinger',
     /**
      * Лимит дочерних процессов Воркеров.
      * 

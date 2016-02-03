@@ -78,13 +78,13 @@
     
     <!-- RUNTIME CONFIGURATION -->
     
-    <condition property="conf-exec-user" value="nobody">
+    <condition property="conf-exec-user" value="pinger">
         <not>  
             <isset property="conf-exec-user"/>
         </not>
     </condition>
     
-    <condition property="conf-exec-group" value="nogroup">
+    <condition property="conf-exec-group" value="pinger">
         <not>  
             <isset property="conf-exec-group"/>
         </not>
