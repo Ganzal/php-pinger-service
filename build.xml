@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- build.xml for Apache ANT -->
-<project name="pinger-service" default="build" basedir=".">
+<project name="php-pinger-service" default="build" basedir=".">
     
     <!-- BUILD-TIME CONFIGURATION -->
     
