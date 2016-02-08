@@ -9,7 +9,9 @@ namespace com\ganzal\repo\bernd;
  * 
  * @package com/ganzal/repo/bernd
  * 
- * @version 15.01.30
+ * @version 16.02.08
+ * @since 16.02.08  Возврат приветствий-прощаний, улучшение алгоритма.
+ * @since 16.01.30  Модификация в проекте php-pinger-service.
  * @since 15.01.30  Убраны лишние символы в сообщении открытия журнала ошибок.
  * @since 15.01.30  Появление в com\ganzal\repo\bernd\TwinLog.php
  *      на базе кода twinlog версии 15.01.30
@@ -39,6 +41,24 @@ class TwinLog
     protected static $err_fn;
 
     /**
+     * Длина бесполезного содержимого журнала ошибок.
+     * 
+     * @type int
+     * @access protected
+     * @static
+     */
+    protected static $err_ul = 0;
+
+    /**
+     * Тело бесполезного содержимого журнала ошибок.
+     * 
+     * @type string
+     * @access protected
+     * @static
+     */
+    protected static $err_uc = '';
+
+    /**
      * Микровремя инициализации класса.
      * 
      * @type float
@@ -64,6 +84,24 @@ class TwinLog
      * @static
      */
     protected static $log_fn = null;
+
+    /**
+     * Длина бесполезного содержимого журнала вывода.
+     * 
+     * @type int
+     * @access protected
+     * @static
+     */
+    protected static $log_ul = 0;
+
+    /**
+     * Тело бесполезного содержимого журнала вывода.
+     * 
+     * @type string
+     * @access protected
+     * @static
+     */
+    protected static $log_uc = '';
 
 
     /**
@@ -111,33 +149,40 @@ class TwinLog
      */
     public static function rename ($logdir, $prefix, $suffix = false, $purge = false)
     {
-        if (static::$log_fh || static::$err_fh)
+        if (static::$log_fh)
         {
-//            $msg = sprintf("[%13s] TwinLog renaming! Have a nice day!\n"
-//                    , static::event_offset()
-//            );
-//
-//            static::stderr_fwrite($msg);
-//            static::stdout_fwrite($msg);
-
-            fclose(static::$err_fh);
             fclose(static::$log_fh);
-            
+
             if ($purge)
             {
-                if (!filesize(static::$err_fn))
-                {
-                    @unlink(static::$err_fn);
-                }
-                
-                if (!filesize(static::$log_fn))
+                if (!filesize(static::$log_fn) ||
+                        (static::$log_ul == filesize(static::$log_fn) &&
+                        static::$log_uc == file_get_contents(static::$log_fn)))
                 {
                     @unlink(static::$log_fn);
                 }
             }
-            
+
+            static::$log_fh = null;
         }
-        
+
+
+        if (static::$err_fh)
+        {
+            fclose(static::$err_fh);
+            if ($purge)
+            {
+                if (!filesize(static::$err_fn) ||
+                        (static::$err_ul == filesize(static::$err_fn) &&
+                        static::$err_uc == file_get_contents(static::$err_fn)))
+                {
+                    @unlink(static::$err_fn);
+                }
+            }
+
+            static::$err_fh = null;
+        }
+
         // сбрасываем микровремя инициализации
         static::$init_utime = microtime(true);
         // разбиваем на секунды и микросекунды
@@ -166,45 +211,33 @@ class TwinLog
         static::$log_fh = fopen(static::$log_fn, 'ab');
 
         // готовим дату запуска
-//        $init_udate = sprintf("%s.%d", date('Y-m-d H:i:s', $sec), $usec);
+        $init_udate = sprintf("%s.%d", date('Y-m-d H:i:s', $sec), $usec);
 
         // записываем заголовок в журнале ошибок.
-//        fwrite(static::$err_fh,
-//                sprintf("\nError log opened by %s%s at %s\n"
-//                        , $prefix
-//                        ,
-//                        ($suffix ? '-' . $suffix : '')
-//                        , $init_udate
-//        ));
+        static::$err_ul = fwrite(static::$err_fh,
+                static::$err_uc = sprintf("\nError log opened by %s%s at %s\n"
+                , $prefix
+                , ($suffix ? '-' . $suffix : '')
+                , $init_udate
+        ));
 
         // записываем заголовок в журнале вывода.
-//        fwrite(static::$log_fh,
-//                sprintf("\nMessage log opened by %s%s at %s\n"
-//                        , $prefix
-//                        ,
-//                        ($suffix ? '+' . $suffix : '')
-//                        , $init_udate
-//        ));
-
-        // готовим сообщение о готовности TwinLog
-//        $msg = sprintf("[%13s] TwinLog ready!\n"
-//                , static::event_offset()
-//        );
-
-        // записываем сообщение о готовности в журнал ошибок...
-//        static::stderr_fwrite($msg);
-        // и журнал вывода.
-//        static::stdout_fwrite($msg);
+        static::$log_ul = fwrite(static::$log_fh,
+                static::$log_uc = sprintf("\nMessage log opened by %s%s at %s\n"
+                , $prefix
+                , ($suffix ? '+' . $suffix : '')
+                , $init_udate
+        ));
 
     }
 
-// public static function rename ($logdir, $prefix, $suffix = false)
+// public static function rename ($logdir, $prefix, $suffix = false, $purge = false)
 
 
     /**
      * Возвращает отступ события относительно времени инициализации TwinLog.
      * 
-     * @return float Разница между текущим значением <code>microtime(true)</code> и <code>static:$init_utime</code>.
+     * @return string Разница между текущим значением <code>microtime(true)</code> и <code>static:$init_utime</code>.
      * @access public
      * @static
      */
@@ -301,13 +334,13 @@ class TwinLog
      * Записывает сообщение в журнал вывода.
      * 
      * @param string $string Строка сообщения.
-     * @return void
+     * @return int|boolean
      * @access private
      * @static
      */
     private static function stdout_fwrite ($string)
     {
-        fwrite(static::$log_fh, $string);
+        return fwrite(static::$log_fh, $string);
 
     }
 
@@ -318,13 +351,13 @@ class TwinLog
      * Записывает сообщение в журнал ошибок.
      * 
      * @param string $string Строка сообщения.
-     * @return void
+     * @return int|boolean
      * @access private
      * @static
      */
     private static function stderr_fwrite ($string)
     {
-        fwrite(static::$err_fh, $string);
+        return fwrite(static::$err_fh, $string);
 
     }
 
@@ -341,32 +374,41 @@ class TwinLog
      */
     public static function kill ($purge = false)
     {
-//        $msg = sprintf("[%13s] TwinLog killed! Have a nice day!\n"
-//                , static::event_offset()
-//        );
-//
-//        static::stderr_fwrite($msg);
-//        static::stdout_fwrite($msg);
+        restore_error_handler();
+        ob_end_clean();
+        
+        $msg = sprintf("[%13s] TwinLog killed! Have a nice day!\n"
+                , static::event_offset()
+        );
+        
+        static::$err_uc .= $msg;
+        static::$err_ul += static::stderr_fwrite($msg);
+        
+        static::$log_uc .= $msg;
+        static::$log_ul += static::stdout_fwrite($msg);
 
         fclose(static::$err_fh);
         fclose(static::$log_fh);
-        
 
         if ($purge)
         {
-            if (!filesize(static::$err_fn))
+            if (!filesize(static::$err_fn) ||
+                    (static::$err_ul == filesize(static::$err_fn) &&
+                    static::$err_uc == file_get_contents(static::$err_fn)))
             {
                 @unlink(static::$err_fn);
             }
 
-            if (!filesize(static::$log_fn))
+            if (!filesize(static::$log_fn) ||
+                    (static::$log_ul == filesize(static::$log_fn) &&
+                    static::$log_uc == file_get_contents(static::$log_fn)))
             {
                 @unlink(static::$log_fn);
             }
         }
-        
-        restore_error_handler();
-        ob_end_clean();
+
+        static::$err_fh = null;
+        static::$log_fh = null;
 
     }
 
