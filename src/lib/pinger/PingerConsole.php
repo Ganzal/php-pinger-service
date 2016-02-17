@@ -543,7 +543,7 @@ class PingerConsole
     {
         fwrite(STDERR,
                 <<<PINGER_HELP
-Usage: pinger {add|rem|enable|disablelist|help}
+Usage: pingerc {add|rem|enable|disable|list|help}
 
 add LABEL FQDN
 rem LABEL
