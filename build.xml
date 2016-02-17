@@ -60,7 +60,7 @@
     
     <property name="conf" value="${with-conf}"/>
     
-    <condition property="with-pidfile" value="/run/pinger.pid">
+    <condition property="with-pidfile" value="/run/pinger/pinger.pid">
         <not>  
             <isset property="with-pidfile"/>
         </not>
@@ -74,7 +74,7 @@
         </not>
     </condition>
     
-    <property name="pidfile" value="${with-pidfile}"/>
+    <property name="logdir" value="${with-logdir}"/>
     
     <!-- RUNTIME CONFIGURATION -->
     
@@ -497,6 +497,64 @@
         <chmod file="${dist}/etc/init.d/pinger" perm="755" />
         
         <move file="${dist.lib.d}/bootstrap.php.dist" tofile="${dist.lib.d}/bootstrap.php" overwrite="yes" />
+    </target>
+    
+    <!-- INSTALL DIST -->
+    
+    <target name="install" depends="build-dist">
+        <exec executable="addgroup">
+            <arg value="--system" />
+            <arg value="pinger" />
+        </exec>
+        
+        <exec executable="adduser">
+            <arg value="--system" />
+            <arg line="--ingroup pinger" />
+            <arg value="pinger" />
+        </exec>
+        
+        <delete dir="${libdir}/pinger" />
+        <mkdir dir="${libdir}/pinger" />
+        
+        <copy todir="${libdir}/pinger" verbose="yes">
+            <fileset dir="${dist.lib.d}">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+        
+        <move file="${dist.bin.d}/pingerc" tofile="${bindir}/pingerc" overwrite="yes" />
+        <chmod file="${bindir}/pingerc" perm="755" />
+        
+        <move file="${dist.sbin.d}/pinger" tofile="${sbindir}/pinger" overwrite="yes" />
+        <chmod file="${sbindir}/pinger" perm="755" />
+        
+        <copy file="${dist}/etc/init.d/pinger" todir="/etc/init.d" overwrite="yes" />
+        <chmod file="/etc/init.d/pinger" perm="755" />
+        
+        <copy file="${dist}/etc/default/pinger" todir="/etc/default" overwrite="yes" />
+           
+        <exec executable="update-rc.d">
+            <arg value="pinger" />
+            <arg value="defaults" />
+        </exec>
+        
+        <mkdir dir="${logdir}" />
+        <chmod type="dir" file="${logdir}" perm="755" />
+        <chown type="dir" file="${logdir}" owner="pinger" />
+        <chgrp type="dir" file="${logdir}" group="pinger" />
+        
+        <mkdir dir="/run/pinger" />
+        <chmod type="dir" file="/run/pinger" perm="755" />
+        <chown type="dir" file="/run/pinger" owner="pinger" />
+        <chgrp type="dir" file="/run/pinger" group="pinger" />
+        
+        <available file="${sysconfdir}/pinger-config.php" type="file"
+                   property="local.config.present"/>
+        <antcall target="install-default-config" />
+    </target>
+    
+    <target name="install-default-config" unless="local.config.present">
+        <copy file="${dist}${sysconfdir}/pinger-config.php" tofile="${sysconfdir}/pinger-config.php" verbose="yes" />
     </target>
     
 </project>
