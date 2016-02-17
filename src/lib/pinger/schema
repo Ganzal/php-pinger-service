@@ -20,9 +20,9 @@ ping_datetime   datetime default:current_timestampt idx
 
 Redis.
 ======
-$bank$hosts:enabled         set<label>
-$bank$hosts:data:$label$    hash<id,label,fqdn,addr,status,state>
-$bank$queue:nslookup        set<label>
-$bank$queue:ping:ok         set<label>
-$bank$queue:ping:prefailed  set<label>
-$bank$queue:ping:failed     set<label>
+${bank}hosts:enabled         set<label>
+${bank}hosts:data:${label}   hash<id,label,fqdn,addr,status,state>
+${bank}queue:nslookup        set<label>
+${bank}queue:ping:ok         set<label>
+${bank}queue:ping:prefailed  set<label>
+${bank}queue:ping:failed     set<label>
