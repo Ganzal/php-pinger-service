@@ -35,10 +35,10 @@ fi
 
 case "$1" in
 start|stop|restart|reload|status|help|*)
-    @base@@sbindir@/pinger $1;
+    DEBUG=${DEBUG} @base@@sbindir@/pinger $1;
     ;;
 install|uninstall)
-    >&2 echo "\nNot implementer yet.\n";
+    >&2 echo "\nNot implemented yet.\n";
     exit 1;
 esac
 
